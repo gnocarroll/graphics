@@ -6,6 +6,7 @@
 
 #include "gfx_config.h"
 #include "gfx_util.h"
+#include "event_handling.h"
 
 SDL_Window *sdl_setup(const char *);
 
@@ -33,26 +34,7 @@ int main(void) {
   int quit = 0;
 
   while (!quit) {
-    SDL_Event event;
-
-    while (SDL_PollEvent(&event)) {
-      switch(event.type) {
-        case SDL_QUIT:
-          quit = 1;
-          break;
-        case SDL_WINDOWEVENT:
-          if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-            quit = 1;
-            break;
-          }
-          else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-            glViewport(0, 0, event.window.data1, event.window.data2);
-            break;
-          }
-          break;
-      }
-
-    }
+    quit = process_events();
 
     glClearColor(0.2, 0.3, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
