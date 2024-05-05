@@ -4,12 +4,8 @@
 #include <glad/glad.h>
 #include <SDL.h>
 
+#include "gfx_config.h"
 #include "gfx_util.h"
-
-#define FULLSCREEN  (0)
-
-#define INIT_WIDTH  (640)
-#define INIT_HEIGHT (480)
 
 SDL_Window *sdl_setup(const char *);
 
@@ -37,15 +33,25 @@ int main(void) {
   int quit = 0;
 
   while (!quit) {
-    // Maybe at some point will set up more advanced event handling, for now
-    // just used to see if loop should stop
-
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        quit = 1;
+      switch(event.type) {
+        case SDL_QUIT:
+          quit = 1;
+          break;
+        case SDL_WINDOWEVENT:
+          if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+            quit = 1;
+            break;
+          }
+          else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+            glViewport(0, 0, event.window.data1, event.window.data2);
+            break;
+          }
+          break;
       }
+
     }
 
     glClearColor(0.2, 0.3, 0.3, 1.0);
@@ -80,23 +86,15 @@ SDL_Window *sdl_setup(const char *window_name) {
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-  SDL_Window *window;
+  // in gfx_config.h I set up the additional flag(s) (e.g. for fullscreen)
 
-  // SDL_CreateWindow(const char *title, int x, int y, int w, int h,
-  //                  Uint32 flags);
-
-  if (FULLSCREEN) {
-    window = SDL_CreateWindow(window_name, 
-                              SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                              0, 0,
-                              SDL_WINDOW_FULLSCREEN_DESKTOP |
-                              SDL_WINDOW_OPENGL);
-  }
-  else {
-    window = SDL_CreateWindow(window_name, 
-                              SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                              INIT_WIDTH, INIT_HEIGHT, SDL_WINDOW_OPENGL);
-  }
+  SDL_Window *window = SDL_CreateWindow(
+      window_name,                                       // title 
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,  // x pos, y pos
+      (FULLSCREEN ? 0 : INIT_WIDTH),                     // width
+      (FULLSCREEN ? 0 : INIT_HEIGHT),                    // height
+      SDL_WINDOW_OPENGL | MY_ADDL_SDL_WIN_FLAGS          // flags
+    );
 
   if (!window) {
     sdl_perror("SDL_CreateWindow");
