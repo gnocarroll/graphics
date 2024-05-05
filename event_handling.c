@@ -12,7 +12,7 @@ static int dequeue_char(void);
 
 enum input_info_type {
   KEYBOARD_INPUT_INFO,
-  MOUSE_INPUT_INFO
+  MOUSE_PRESS_INFO
 };
 
 typedef struct mouse_info {
@@ -33,12 +33,20 @@ typedef struct input_info {
 
   union {
     SDL_Keysym keysym;  // For keyboard input
-    mouse_info;  // For mouse input
+    mouse_info m_info;  // For mouse input
   };
 } input_info;
 
 input_info in_mappings[N_INPUT_TYPES] = {
-  [QUIT] = { KEYBOARD_INPUT_INFO, .keysym.sym = '\x1B' }  // ESC key for now
+  [QUIT]    = { KEYBOARD_INPUT_INFO, .keysym.sym = '\x1B' },  //
+
+  [L_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_LEFT },
+  [R_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_RIGHT },
+  [U_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_UP },
+  [D_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_DOWN },
+
+  [MOUSE1]  = { MOUSE_PRESS_INFO, .m_info.button = SDL_BUTTON_LEFT },
+  [MOUSE2]  = { MOUSE_PRESS_INFO, .m_info.button = SDL_BUTTON_RIGHT }
 };
 
 // for recording states of keys/inputs

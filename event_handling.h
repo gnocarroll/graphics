@@ -47,8 +47,6 @@ typedef enum input_enum {
 
   MOUSE1,
   MOUSE2,
-  MOUSE3,
-  MOUSE4,
 
   // Provides number of values enum has
 
