@@ -37,7 +37,7 @@ int main(void) {
   int quit = 0;
 
   while (!quit) {
-    // Maybe at some point will setup more advanced event handling, for now
+    // Maybe at some point will set up more advanced event handling, for now
     // just used to see if loop should stop
 
     SDL_Event event;
