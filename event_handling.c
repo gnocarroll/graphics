@@ -10,11 +10,38 @@ static int modify_keyboard_state(SDL_KeyboardEvent);
 static int enqueue_char(SDL_Keysym);
 static int dequeue_char(void);
 
-SDL_Keysym in_mappings[N_INPUT_TYPES] = {
-  [QUIT] = { 0, '\x1B' }
+enum input_info_type {
+  KEYBOARD_INPUT_INFO,
+  MOUSE_INPUT_INFO
 };
 
-// struct for recording states of keys/inputs
+typedef struct mouse_info {
+  // SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT
+  // SDL_BUTTON_X1, SDL_BUTTON_X2;
+
+  Uint8 button;
+  Uint8 clicks;  // n clicks corresponding to certain action
+} mouse_info;
+
+/*
+ *  struct input_info describes the input corresponding to a certain action,
+ *  e.g. moving the player forward
+ */
+
+typedef struct input_info {
+  Uint8 type;
+
+  union {
+    SDL_Keysym keysym;  // For keyboard input
+    mouse_info;  // For mouse input
+  };
+} input_info;
+
+input_info in_mappings[N_INPUT_TYPES] = {
+  [QUIT] = { KEYBOARD_INPUT_INFO, .keysym.sym = '\x1B' }  // ESC key for now
+};
+
+// for recording states of keys/inputs
 // counter for each thing program should pay attention to
 
 typedef Uint8 input_state_arr[N_INPUT_TYPES];
@@ -61,6 +88,10 @@ int process_events(void) {
       case SDL_KEYUP:
         modify_keyboard_state(event.key);
         break;
+      case SDL_MOUSEBUTTONDOWN:
+      case SDL_MOUSEBUTTONUP:
+        // TODO: modify input state for mouse button press
+        break;
     }
   }
 
@@ -85,7 +116,8 @@ static int modify_keyboard_state(SDL_KeyboardEvent key) {
   }
 
   for (int i = 0; i < N_INPUT_TYPES; i++) {
-    if (key.keysym.sym == in_mappings[i].sym) {
+    if ((in_mappings[i].type == KEYBOARD_INPUT_INFO) &&
+        (key.keysym.sym == in_mappings[i].keysym.sym)) {
       input_states[i] = state_bool;
       (*state_arr)[i]++;
     }
