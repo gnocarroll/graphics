@@ -7,64 +7,41 @@
 
 static int modify_keyboard_state(SDL_KeyboardEvent);
 
+static int enqueue_char(SDL_Keysym);
+static int dequeue_char(void);
+
+SDL_Keysym in_mappings[N_INPUT_TYPES] = {
+  [QUIT] = { 0, '\x1B' }
+};
+
 // struct for recording states of keys/inputs
 // counter for each thing program should pay attention to
 
-typedef struct key_state_s {
-  Uint8 esc;
-  Uint8 space;
-  Uint8 tab;
-  Uint8 ret;
-  Uint8 backspace;
-
-  Uint8 ctrl;
-  Uint8 shift;
-  Uint8 alt;
-
-  Uint8 printable[96];
-
-  Uint8 up;
-  Uint8 down;
-  Uint8 left;
-  Uint8 right;
-
-  Uint8 fn[15];
-
-  Uint8 caps_lock;
-
-  // Modifiers
-
-  Uint8 kmod_caps; // specifically caps lock (does not refer to shift)
-
-  Uint8 kmod_ctrl;
-  Uint8 kmod_shift;
-  Uint8 kmod_alt;
-
-  Uint8 kmod_lctrl;
-  Uint8 kmod_rctrl;
-  Uint8 kmod_lshift;
-  Uint8 kmod_rshift;
-  Uint8 kmod_lalt;
-  Uint8 kmod_ralt;
-} key_state_s;
+typedef Uint8 input_state_arr[N_INPUT_TYPES];
 
 // key_states:   is key currently pressed? Persists across frames.
 // key_pressed:  n times pressed this frame
 // key_released: n times released this frame
 
-static key_state_s key_states;
-static key_state_s key_pressed;
-static key_state_s key_released;
+static input_state_arr input_states;
+static input_state_arr input_pressed;
+static input_state_arr input_released;
+
+// queue for ASCII characters, may be useful if typing necessary in game
+
+#define ASCII_QUEUE_LEN (256)
+
+static unsigned char ascii_queue[ASCII_QUEUE_LEN];
+static unsigned front = 0;
+static unsigned back = 0;
 
 /*
  *  Processes all events. Return value indicates if program should quit.
  */
 
 int process_events(void) {
-  // Reset key_pressed, key_released every time inputs are processed
-
-  memset(&key_pressed, 0, sizeof(key_pressed));
-  memset(&key_released, 0, sizeof(key_released));
+  memset(&input_pressed, 0, sizeof(input_pressed));
+  memset(&input_released, 0, sizeof(input_released));
 
   SDL_Event event;
 
@@ -90,19 +67,110 @@ int process_events(void) {
   return 0;
 }
 
+/*
+ *  Modify structs that record state of input using SDL_KeyboardEvent.
+ */
+
 static int modify_keyboard_state(SDL_KeyboardEvent key) {
   Uint8 state_bool = (Uint8) (key.type == SDL_KEYDOWN);
-  key_state_s *state_s = (key.type == SDL_KEYDOWN ?
-                          &key_pressed : &key_released);
+  input_state_arr *state_arr = (key.type == SDL_KEYDOWN ?
+                                &input_pressed : &input_released);
 
-  if (key.type == SDL_KEYDOWN) {
-    printf("Key information\n");
+  // queue is maintained for the purposes of maybe using some form of typing
+  // in game (e.g. messaging, configuring something)
+  // separate from other input processing
 
-    if (key.keysym.sym == SDLK_a) {
-      printf("Is a\n");
+  if (state_bool) {
+    enqueue_char(key.keysym);
+  }
+
+  for (int i = 0; i < N_INPUT_TYPES; i++) {
+    if (key.keysym.sym == in_mappings[i].sym) {
+      input_states[i] = state_bool;
+      (*state_arr)[i]++;
     }
   }
 
   return 0;
+}
+
+/*
+ *  Functions below are for working with ascii_queue.
+ */
+
+#define NEXT_QUEUE_IDX(i) ((i + 1) % ASCII_QUEUE_LEN)
+
+static int enqueue_char(SDL_Keysym keysym) {
+  if ((keysym.sym <= 0) || (keysym.sym > 127)) {
+    return -1;  // not ascii
+  }
+
+  unsigned char c = (unsigned char) keysym.sym;
+
+  if (NEXT_QUEUE_IDX(back) == front) {
+    // keep back from becoming front (would imply empty queue)
+    // effectively we are discarding from front of queue here
+
+    front = NEXT_QUEUE_IDX(front);
+  }
+
+  ascii_queue[back] = c;  // add to back
+  back = NEXT_QUEUE_IDX(back);
+
+  return 0;
+}
+
+/*
+ *  -1  => no char
+ *  > 0 => unsigned char cast to int
+ */
+
+static int dequeue_char(void) {
+  if (front == back) {
+    return -1;
+  }
+
+  int ret = (int) ((unsigned char) ascii_queue[front]);
+
+  front = NEXT_QUEUE_IDX(front);
+
+  return ret;
+}
+
+void clear_ascii_queue(void) {
+  front = 0;
+  back = 0;
+}
+
+/*
+ *  Non-static wrapper for above so program can pull characters out of queue.
+ */
+
+int getc_ascii(void) {
+  return dequeue_char();
+}
+
+int is_pressed_now(int input_type) {
+  if ((input_type < 0) || (input_type >= N_INPUT_TYPES)) {
+    return 0;
+  }
+
+  return input_states[input_type]; 
+}
+
+int was_pressed(int input_type) {
+  if ((input_type < 0) || (input_type >= N_INPUT_TYPES)) {
+    return 0;
+  }
+
+  return input_pressed[input_type]; 
+}
+
+int was_released(int input_type) {
+  if ((input_type < 0) || (input_type >= N_INPUT_TYPES)) {
+    return 0;
+  }
+
+  return input_released[input_type]; 
 }
 
