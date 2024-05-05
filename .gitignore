@@ -1,0 +1,12 @@
+# Ignore object files
+
+*.o
+
+# Ignore glad
+
+glad
+
+# Ignore executable (change this if executable name changes)
+
+learn_gfx
+
