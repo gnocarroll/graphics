@@ -88,6 +88,7 @@ int compile_shader_file(unsigned int shader, const char *filename) {
   char *buff = malloc(f_size + 1);
 
   size_t read = fread(buff, 1, f_size, f);
+  fclose(f);
 
   if (read > f_size) {
     perror("fread");
