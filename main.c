@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -64,7 +65,9 @@ int main(void) {
   }
 
   glUseProgram(program);
-  
+
+  int ourColorLoc = glGetUniformLocation(program, "ourColor");
+
   unsigned int VAO;
 
   glGenVertexArrays(1, &VAO);
@@ -92,6 +95,12 @@ int main(void) {
 
     glClearColor(0.2, 0.3, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    float time = ((float) SDL_GetTicks64()) / 1000;
+
+    float green = (sin(time) / 2.0f) + 0.5f;
+
+    glUniform4f(ourColorLoc, 0.0f, green, 0.0f, 1.0f);
 
     // primitive to draw, start index, n vertices
 

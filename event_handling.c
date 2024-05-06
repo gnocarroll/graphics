@@ -114,7 +114,7 @@ int process_events(void) {
   SDL_Event event;
 
   while (SDL_PollEvent(&event)) {
-    switch(event.type) {
+    switch (event.type) {
       case SDL_QUIT:
         return 1;
       case SDL_WINDOWEVENT:
@@ -135,6 +135,8 @@ int process_events(void) {
         break;
       case SDL_MOUSEMOTION:
         mouse_motion_handler(event.motion);
+        break;
+      default:
         break;
     }
   }
