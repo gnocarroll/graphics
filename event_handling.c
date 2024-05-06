@@ -200,8 +200,6 @@ static int mouse_motion_handler(SDL_MouseMotionEvent motion) {
   mouse_x = motion.x;
   mouse_y = motion.y;
 
-  printf("%d, %d\n", mouse_x, mouse_y);
-
   net_xrel += motion.xrel;
   net_yrel += motion.yrel;
 

@@ -7,6 +7,7 @@
 #include "gfx_config.h"
 #include "gfx_util.h"
 #include "event_handling.h"
+#include "shaders.h"
 
 SDL_Window *sdl_setup(const char *);
 
@@ -34,9 +35,53 @@ int main(void) {
   // relative mode hides cursor and constrains mouse position to window
   // would be used in FPS or something like that
 
-  SDL_SetRelativeMouseMode(SDL_TRUE);
+  // SDL_SetRelativeMouseMode(SDL_TRUE);
 
   int quit = 0;
+
+  float vertices[] = {
+    -0.5, -0.5, 0.0,
+     0.5, -0.5, 0.0,
+     0.0,  0.5, 0.0
+  };
+
+  unsigned int vertexShader = get_vertex_shader("vertex.glsl");
+  unsigned int fragShader = get_frag_shader("frag.glsl");
+
+  if ((!vertexShader) || (!fragShader)) {
+    fprintf(stderr, "missing shader\n");
+    exit(1);
+  }
+
+  unsigned int arr[2] = { vertexShader, fragShader };
+  unsigned int program = get_program(arr, 2);
+
+  delete_shaders(arr, 2);
+  
+  if (!program) {
+    fprintf(stderr, "creating shader program failed\n");
+    exit(1);
+  }
+
+  glUseProgram(program);
+  
+  unsigned int VAO;
+
+  glGenVertexArrays(1, &VAO);
+  
+  glBindVertexArray(VAO);
+
+  unsigned int VBO;
+
+  glGenBuffers(1, &VBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                        (void *) 0);
+  glEnableVertexAttribArray(0);
 
   while (!quit) {
     quit = process_events();
@@ -47,6 +92,10 @@ int main(void) {
 
     glClearColor(0.2, 0.3, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // primitive to draw, start index, n vertices
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
     SDL_GL_SwapWindow(window);
   }
