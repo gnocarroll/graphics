@@ -31,6 +31,11 @@ int main(void) {
 
   glViewport(0, 0, w, h);
 
+  // relative mode hides cursor and constrains mouse position to window
+  // would be used in FPS or something like that
+
+  SDL_SetRelativeMouseMode(SDL_TRUE);
+
   int quit = 0;
 
   while (!quit) {

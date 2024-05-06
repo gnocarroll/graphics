@@ -24,6 +24,22 @@ int was_pressed(int);
 int was_released(int);
 
 /*
+ *  Mouse click information
+ */
+
+int get_first_mouse_click_x(void);
+int get_first_mouse_click_y(void);
+int get_last_mouse_click_x(void);
+int get_last_mouse_click_y(void);
+
+/*
+ *  Mouse position information
+ */
+
+int get_mouse_x(void);
+int get_mouse_y(void);
+
+/*
  *  enum for actions that player's input can correspond to
  */
 
