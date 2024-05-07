@@ -53,33 +53,49 @@ int get_mouse_x(void);
 int get_mouse_y(void);
 
 /*
- *  enum for actions that player's input can correspond to
+ *  enum for querying and storing what inputs occurred
  */
 
 typedef enum input_enum {
-  // Configurable inputs
+  // first 127 will be ascii, can query with corresponding char
 
-  QUIT = 0,
-  LEFT,
-  RIGHT,
-  FORWARD,
-  BACK,
-  ATTACK1,
-  ATTACK2,
-
-  // Non-configurable inputs (e.g. for navigating menus)
-
-  L_ARROW,
+  L_ARROW = 128,
   R_ARROW,
   U_ARROW,
   D_ARROW,
+  INPUT_F1,
+  INPUT_F2,
+  INPUT_F3,
+  INPUT_F4,
+  INPUT_F5,
+  INPUT_F6,
+  INPUT_F7,
+  INPUT_F8,
+  INPUT_F9,
+  INPUT_F10,
+  INPUT_F11,
+  INPUT_F12,
+  INPUT_F13,
+  INPUT_F14,
+  INPUT_F15,
+  CAPSLOCK,
+  RSHIFT,
+  LSHIFT,
+  RCTRL,
+  LCTRL,
+  RALT,
+  LALT,
+
+  // mouse
 
   MOUSE1,
   MOUSE2,
-
-  // Provides number of values enum has
+  MOUSE3,
+  MOUSE4,
+  MOUSE5,
 
   N_INPUT_TYPES
 } input_enum;
+
 
 #endif // EVENT_HANDLING_H

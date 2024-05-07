@@ -101,7 +101,7 @@ int main(void) {
     update_time_elapsed();
     quit = process_events();
 
-    if (was_pressed(QUIT)) {
+    if (was_pressed(27)) {  // 27 is ESC
       quit = 1;
     }
 

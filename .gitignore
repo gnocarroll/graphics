@@ -10,3 +10,7 @@ glad
 
 learn_gfx
 
+# 3rd party header library for loading textures
+
+stb_image.h
+

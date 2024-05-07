@@ -14,50 +14,15 @@ static int mouse_motion_handler(SDL_MouseMotionEvent);
 static int mouse_wheel_handler(SDL_MouseWheelEvent);
 static int text_input_handler(SDL_TextInputEvent);
 
+// for keycodes not ASCII, find idx in input_state_arr
+
+int SDLK_to_idx(SDL_Keycode);
+
 // add/remove from text input queue
 
 static int enqueue_char_keysym(SDL_Keysym);
 static int enqueue_char(unsigned char);
 static int dequeue_char(void);
-
-enum input_info_type {
-  KEYBOARD_INPUT_INFO,
-  MOUSE_PRESS_INFO
-};
-
-typedef struct mouse_info {
-  // SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT
-  // SDL_BUTTON_X1, SDL_BUTTON_X2;
-
-  Uint8 button;
-  Uint8 clicks;  // n clicks corresponding to certain action
-} mouse_info;
-
-/*
- *  struct input_info describes the input corresponding to a certain action,
- *  e.g. moving the player forward
- */
-
-typedef struct input_info {
-  Uint8 type;
-
-  union {
-    SDL_Keysym keysym;  // For keyboard input
-    mouse_info m_info;  // For mouse input
-  };
-} input_info;
-
-input_info in_mappings[N_INPUT_TYPES] = {
-  [QUIT]    = { KEYBOARD_INPUT_INFO, .keysym.sym = '\x1B' },  //
-
-  [L_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_LEFT },
-  [R_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_RIGHT },
-  [U_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_UP },
-  [D_ARROW] = { KEYBOARD_INPUT_INFO, .keysym.sym = SDLK_DOWN },
-
-  [MOUSE1]  = { MOUSE_PRESS_INFO, .m_info.button = SDL_BUTTON_LEFT },
-  [MOUSE2]  = { MOUSE_PRESS_INFO, .m_info.button = SDL_BUTTON_RIGHT }
-};
 
 // for recording states of keys/inputs
 // counter for each thing program should pay attention to
@@ -165,16 +130,19 @@ static int key_handler(SDL_KeyboardEvent key) {
   Uint8 state_bool = (Uint8) (key.type == SDL_KEYDOWN);
   input_state_arr *state_arr = (state_bool ?
                                 &input_pressed : &input_released);
+  int is_sym_in_ascii_range = ((key.keysym.sym >= 0) &&
+                               (key.keysym.sym < 128));
 
   // queue is maintained for the purposes of maybe using some form of typing
   // in game (e.g. messaging, configuring something)
   // separate from other input processing
 
-  if ((is_on_ascii_queue) && (state_bool)) {
+  if ((is_on_ascii_queue) && (state_bool) && (is_sym_in_ascii_range)) {
     // SDL_TEXTINPUT will handle most inputs from user, but here we will get
     // things that are not captured there (see below)
 
     // get as int to compare against int constants
+    // (don't think this is necessary but anyways)
 
     int keycode = (int) key.keysym.sym;
 
@@ -190,12 +158,18 @@ static int key_handler(SDL_KeyboardEvent key) {
     }
   }
 
-  for (int i = 0; i < N_INPUT_TYPES; i++) {
-    if ((in_mappings[i].type == KEYBOARD_INPUT_INFO) &&
-        (key.keysym.sym == in_mappings[i].keysym.sym)) {
-      input_states[i] = state_bool;
-      (*state_arr)[i]++;
-    }
+  int idx;
+
+  if (is_sym_in_ascii_range) {
+    idx = (int) key.keysym.sym;
+  }
+  else {
+    idx = SDLK_to_idx(key.keysym.sym);
+  }
+
+  if (idx != -1) {
+    input_states[idx] = state_bool;
+    (*state_arr)[idx]++;
   }
 
   return 0;
@@ -205,13 +179,28 @@ static int mouse_button_handler(SDL_MouseButtonEvent button) {
   Uint8 state_bool = (Uint8) (button.type == SDL_MOUSEBUTTONDOWN);
   input_state_arr *state_arr = (state_bool ?
                                 &input_pressed : &input_released);
-  
-  for (int i = 0; i < N_INPUT_TYPES; i++) {
-    if ((in_mappings[i].type == MOUSE_PRESS_INFO) &&
-        (button.button == in_mappings[i].m_info.button)) {
-      input_states[i] = state_bool;
-      (*state_arr)[i]++;
-    }
+
+  switch (button.button) {
+    case SDL_BUTTON_LEFT:
+      input_states[MOUSE1] = state_bool;
+      (*state_arr)[MOUSE1] += button.clicks;
+      break;
+    case SDL_BUTTON_RIGHT:
+      input_states[MOUSE2] = state_bool;
+      (*state_arr)[MOUSE2] += button.clicks;
+      break;
+    case SDL_BUTTON_MIDDLE:
+      input_states[MOUSE3] = state_bool;
+      (*state_arr)[MOUSE3] += button.clicks;
+      break;
+    case SDL_BUTTON_X1:
+      input_states[MOUSE4] = state_bool;
+      (*state_arr)[MOUSE4] += button.clicks;
+      break;
+    case SDL_BUTTON_X2:
+      input_states[MOUSE5] = state_bool;
+      (*state_arr)[MOUSE5] += button.clicks;
+      break;
   }
 
   if (state_bool) {
@@ -370,5 +359,78 @@ int get_last_mouse_click_x(void) {
 
 int get_last_mouse_click_y(void) {
   return last_mouse_click_y;
+}
+
+/*
+ *  Should be relatively efficient way of doing this but is ugly.
+ */
+
+int SDLK_to_idx(SDL_Keycode keycode) {
+  switch (keycode) {
+    // Arrow keys
+
+    case SDLK_UP:
+      return U_ARROW;
+    case SDLK_DOWN:
+      return D_ARROW;
+    case SDLK_RIGHT:
+      return R_ARROW;
+    case SDLK_LEFT:
+      return L_ARROW;
+
+    // Function keys
+
+    case SDLK_F1:
+      return INPUT_F1;
+    case SDLK_F2:
+      return INPUT_F2;
+    case SDLK_F3:
+      return INPUT_F3;
+    case SDLK_F4:
+      return INPUT_F4;
+    case SDLK_F5:
+      return INPUT_F5;
+    case SDLK_F6:
+      return INPUT_F6;
+    case SDLK_F7:
+      return INPUT_F7;
+    case SDLK_F8:
+      return INPUT_F8;
+    case SDLK_F9:
+      return INPUT_F9;
+    case SDLK_F10:
+      return INPUT_F10;
+    case SDLK_F11:
+      return INPUT_F11;
+    case SDLK_F12:
+      return INPUT_F12;
+    case SDLK_F13:
+      return INPUT_F13;
+    case SDLK_F14:
+      return INPUT_F14;
+    case SDLK_F15:
+      return INPUT_F15;
+
+    // Other
+
+    case SDLK_CAPSLOCK:
+      return CAPSLOCK;
+    case SDLK_RSHIFT:
+      return RSHIFT;
+    case SDLK_LSHIFT:
+      return LSHIFT;
+    case SDLK_RCTRL:
+      return RCTRL;
+    case SDLK_LCTRL:
+      return LCTRL;
+    case SDLK_RALT:
+      return RALT;
+    case SDLK_LALT:
+      return LALT;
+    default:
+      break;
+  }
+
+  return -1;
 }
 
