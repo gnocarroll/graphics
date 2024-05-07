@@ -15,7 +15,7 @@ all: $(GOAL)
 
 # Generate object files
 
-objects=main.o glad/glad.o event_handling.o shaders.o
+objects=main.o glad/glad.o event_handling.o shaders.o gfx_util.o
 objects_w_hdr=
 
 $(objects): %.o: %.c

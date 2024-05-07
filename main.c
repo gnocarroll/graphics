@@ -94,6 +94,10 @@ int main(void) {
   glEnableVertexAttribArray(0);
 
   while (!quit) {
+    // update time elapsed (in this case, between frames) and process events
+    // (e.g. inputs, window events)
+
+    update_time_elapsed();
     quit = process_events();
 
     if (was_pressed(QUIT)) {
