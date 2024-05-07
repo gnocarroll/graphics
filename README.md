@@ -7,4 +7,4 @@ function addresses.\
 To build the executable you will need the following: OpenGL 4.3+ capable
 drivers, the prerequisites necessary for development with SDL 2.0, GLAD (not
 GLAD2) with glad.h at the path glad/glad.h in your includes and glad.c at the
-path glad/glad.c locally.
+path glad/glad.c inside the repo itself.
