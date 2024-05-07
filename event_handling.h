@@ -10,6 +10,8 @@ int process_events(void);
 /*
  *  Key inputs are also saved in ascii array, e.g. for implementing typing for
  *  some kind of messaging or configuring.
+ *  When getting text input should probably pull everything out every frame or
+ *  at least frequently since queue will just dump chars if it gets full.
  */
 
 #define ASCII_QUEUE_LEN (256)

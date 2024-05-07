@@ -324,7 +324,8 @@ void clear_text_input(void) {
 }
 
 /*
- *  Non-static wrapper for above so program can pull characters out of queue.
+ *  Non-static wrapper for dequeue_char() above so program can pull characters
+ *  out of queue.
  */
 
 int getc_text_input(void) {
