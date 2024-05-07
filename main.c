@@ -9,6 +9,7 @@
 #include "gfx_util.h"
 #include "event_handling.h"
 #include "shaders.h"
+#include "linalg.h"
 
 SDL_Window *sdl_setup(const char *);
 void gl_debug_message(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *,
@@ -48,9 +49,9 @@ int main(void) {
   int quit = 0;
 
   float vertices[] = {
-    -0.5, -0.5, 0.0,
-     0.5, -0.5, 0.0,
-     0.0,  0.5, 0.0
+    -0.5, -0.5, 0.0,  1.0, 0.0, 0.0,  // colors on the right
+     0.5, -0.5, 0.0,  0.0, 1.0, 0.0,
+     0.0,  0.5, 0.0,  0.0, 0.0, 1.0
   };
 
   unsigned int vertexShader = get_vertex_shader("vertex.glsl");
@@ -89,9 +90,13 @@ int main(void) {
 
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
                         (void *) 0);
   glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                        (void *) (3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   update_time_elapsed();
 
@@ -108,10 +113,6 @@ int main(void) {
 
     glClearColor(0.2, 0.3, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-
-    float green = (sin(GET_SECS()) / 2.0f) + 0.5f;
-
-    glUniform4f(ourColorLoc, 0.0f, green, 0.0f, 1.0f);
 
     // primitive to draw, start index, n vertices
 
