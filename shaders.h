@@ -23,6 +23,15 @@ int compile_shader_file(unsigned int, const char *);
 
 unsigned int get_program(unsigned int *, size_t);
 
+/*
+ *  Provide path to vertex shader, path to fragment shader and get shader
+ *  program.
+ */
+
+unsigned int get_program_from_files(const char *, const char *);
+
+// will call glDeleteShader() on all shaders in array and set their values to 0
+
 void delete_shaders(unsigned int *, size_t);
 
 #endif // SHADERS_H

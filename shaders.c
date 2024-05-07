@@ -7,6 +7,30 @@
 
 static char info_log[512];
 
+unsigned int get_program_from_files(const char *vertex_file,
+                                    const char *frag_file) {
+  unsigned int vertex = get_vertex_shader(vertex_file);
+
+  if (!vertex) {
+    return 0;
+  }
+
+  unsigned int frag = get_frag_shader(frag_file);
+
+  if (!frag) {
+    glDeleteShader(vertex);
+    return 0;
+  }
+
+  unsigned int shaders[2] = { vertex, frag };
+  unsigned int program = get_program(shaders, 2);
+
+  glDeleteShader(vertex);
+  glDeleteShader(frag);
+
+  return program;
+}
+
 void delete_shaders(unsigned int *shaders, size_t nmemb) {
   for (size_t i = 0; i < nmemb; i++) {
     glDeleteShader(shaders[i]);

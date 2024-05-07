@@ -12,6 +12,7 @@
 #include "linalg.h"
 
 SDL_Window *sdl_setup(const char *);
+void set_texture_options(void);
 void gl_debug_message(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *,
                       const void *);
 
@@ -46,6 +47,8 @@ int main(void) {
 
   // SDL_SetRelativeMouseMode(SDL_TRUE);
 
+  set_texture_options();
+
   int quit = 0;
 
   float vertices[] = {
@@ -54,18 +57,9 @@ int main(void) {
      0.0,  0.5, 0.0,  0.0, 0.0, 1.0
   };
 
-  unsigned int vertexShader = get_vertex_shader("vertex.glsl");
-  unsigned int fragShader = get_frag_shader("frag.glsl");
+  float texCoords[] = { 0.0, 0.0, 1.0, 0.0, 0.5, 1.0 };
 
-  if ((!vertexShader) || (!fragShader)) {
-    fprintf(stderr, "missing shader\n");
-    exit(1);
-  }
-
-  unsigned int arr[2] = { vertexShader, fragShader };
-  unsigned int program = get_program(arr, 2);
-
-  delete_shaders(arr, 2);
+  unsigned int program = get_program_from_files("vertex.glsl", "frag.glsl");
   
   if (!program) {
     fprintf(stderr, "creating shader program failed\n");
@@ -174,6 +168,23 @@ SDL_Window *sdl_setup(const char *window_name) {
   SDL_GL_SetSwapInterval(1);
 
   return window;
+}
+
+/*
+ *  Set preferred texture options.
+ */
+
+void set_texture_options(void) {
+  // texture wrapping option
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+  // how to sample textures
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 /*
