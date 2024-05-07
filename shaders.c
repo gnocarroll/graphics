@@ -35,9 +35,7 @@ unsigned int get_program(unsigned int *shaders, size_t nmemb) {
     glGetProgramInfoLog(program, 512, NULL, info_log);
     fprintf(stderr, "creating shader program: %s\n", info_log);
 
-    if (program) {
-      glDeleteProgram(program);
-    }
+    glDeleteProgram(program);
 
     return 0;
   }
@@ -54,7 +52,8 @@ static unsigned int get_shader(const char *filename, GLenum shaderType) {
 
   int ret = compile_shader_file(shader, filename);
 
-  if (ret == -1) {
+  if (ret == -1) {  // failure in compile_shader_file
+    glDeleteShader(shader);
     return 0;
   }
 
@@ -87,12 +86,14 @@ int compile_shader_file(unsigned int shader, const char *filename) {
 
   char *buff = malloc(f_size + 1);
 
+  // "read" will indicate # bytes read from file
+
   size_t read = fread(buff, 1, f_size, f);
   fclose(f);
 
-  if (read > f_size) {
+  if (read > f_size) {  // should be impossible
     perror("fread");
-    exit(1);
+    exit(1);  // will exit because could have heap corruption
   }
 
   buff[read] = '\0';
