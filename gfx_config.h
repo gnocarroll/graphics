@@ -29,4 +29,11 @@
 
 #define MY_ADDL_SDL_WIN_FLAGS (FS_FLAG | RS_FLAG)
 
+// debug options
+
+#define SDL_DEBUG (1)
+#define GL_DEBUG  (1)
+
+#define GL_ONLY_PRINT_ERR (1)
+
 #endif // GFX_CONFIG_H

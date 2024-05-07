@@ -11,6 +11,8 @@
 #include "shaders.h"
 
 SDL_Window *sdl_setup(const char *);
+void gl_debug_message(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *,
+                      const void *);
 
 int main(void) {
   // I will begin my going through LearnOpenGL.com and then once I have a
@@ -25,6 +27,11 @@ int main(void) {
     fprintf(stderr, "GLAD failed\n");
     exit(1);
   }
+
+#if (GL_DEBUG)
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback(gl_debug_message, NULL);
+#endif
 
   int w;
   int h;
@@ -162,5 +169,26 @@ SDL_Window *sdl_setup(const char *window_name) {
   SDL_GL_SetSwapInterval(1);
 
   return window;
+}
+
+/*
+ *  For use with glDebugMessageCallback().
+ */
+
+void gl_debug_message(GLenum source, GLenum type, GLuint id, GLenum severity,
+                      GLsizei length, const GLchar *message,
+                      const void *userParam) {
+#if (GL_ONLY_PRINT_ERR)
+  if (type == GL_DEBUG_TYPE_ERROR) {
+#endif
+
+  fprintf(stderr, "type: 0x%x (%s), severity: 0x%x, message (between ***): "
+                  "*** %s ***\n",
+          type, (type == GL_DEBUG_TYPE_ERROR ?
+                 "error" : "type other than error"), severity, message);
+
+#if (GL_ONLY_PRINT_ERR)
+  }
+#endif
 }
 
