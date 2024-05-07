@@ -93,6 +93,8 @@ int main(void) {
                         (void *) 0);
   glEnableVertexAttribArray(0);
 
+  update_time_elapsed();
+
   while (!quit) {
     // update time elapsed (in this case, between frames) and process events
     // (e.g. inputs, window events)
@@ -107,9 +109,7 @@ int main(void) {
     glClearColor(0.2, 0.3, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    float time = ((float) SDL_GetTicks64()) / 1000;
-
-    float green = (sin(time) / 2.0f) + 0.5f;
+    float green = (sin(GET_SECS()) / 2.0f) + 0.5f;
 
     glUniform4f(ourColorLoc, 0.0f, green, 0.0f, 1.0f);
 

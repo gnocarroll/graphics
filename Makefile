@@ -8,7 +8,7 @@ SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LDLIBS := $(shell sdl2-config --libs)
 
 CC = gcc
-CFLAGS := -g $(SDL_CFLAGS)
+CFLAGS := -O3 -g $(SDL_CFLAGS)
 LDLIBS := -lm -lGL $(SDL_LDLIBS)
 
 all: $(GOAL)

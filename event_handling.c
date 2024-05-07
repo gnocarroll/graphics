@@ -5,12 +5,19 @@
 #include <glad/glad.h>
 #include <SDL.h>
 
+// for each event processed, there is switch statement on type
+// corresponding one of these will be called to handle event
+
 static int key_handler(SDL_KeyboardEvent);
 static int mouse_button_handler(SDL_MouseButtonEvent);
 static int mouse_motion_handler(SDL_MouseMotionEvent);
 static int mouse_wheel_handler(SDL_MouseWheelEvent);
+static int text_input_handler(SDL_TextInputEvent);
 
-static int enqueue_char(SDL_Keysym);
+// add/remove from text input queue
+
+static int enqueue_char_keysym(SDL_Keysym);
+static int enqueue_char(unsigned char);
 static int dequeue_char(void);
 
 enum input_info_type {
@@ -90,11 +97,11 @@ static Sint32 net_wheel_y;
 
 // queue for ASCII characters, may be useful if typing necessary in game
 
-#define ASCII_QUEUE_LEN (256)
-
 static unsigned char ascii_queue[ASCII_QUEUE_LEN];
 static unsigned front = 0;
 static unsigned back = 0;
+
+static int is_on_ascii_queue = 0;
 
 /*
  *  Processes all events. Return value indicates if program should quit.
@@ -136,6 +143,12 @@ int process_events(void) {
       case SDL_MOUSEMOTION:
         mouse_motion_handler(event.motion);
         break;
+      case SDL_MOUSEWHEEL:
+        mouse_wheel_handler(event.wheel);
+        break;
+      case SDL_TEXTINPUT:
+        text_input_handler(event.text);
+        break;
       default:
         break;
     }
@@ -157,8 +170,24 @@ static int key_handler(SDL_KeyboardEvent key) {
   // in game (e.g. messaging, configuring something)
   // separate from other input processing
 
-  if (state_bool) {
-    enqueue_char(key.keysym);
+  if ((is_on_ascii_queue) && (state_bool)) {
+    // SDL_TEXTINPUT will handle most inputs from user, but here we will get
+    // things that are not captured there (see below)
+
+    // get as int to compare against int constants
+
+    int keycode = (int) key.keysym.sym;
+
+    if ((keycode == 8) || (keycode == 13) ||    // backspace, enter
+        (keycode == 27) || (keycode == 127)) {  // ESC, delete
+      enqueue_char((unsigned char) keycode);
+    }
+    else if (key.keysym.sym == SDLK_LEFT) {     // left arrow
+      enqueue_char(L_ARROW_CHAR);
+    }
+    else if (key.keysym.sym == SDLK_RIGHT) {    // right arrow
+      enqueue_char(R_ARROW_CHAR);
+    }
   }
 
   for (int i = 0; i < N_INPUT_TYPES; i++) {
@@ -222,18 +251,43 @@ static int mouse_wheel_handler(SDL_MouseWheelEvent wheel) {
 }
 
 /*
+ *  Add all characters in event to input queue. Most characters except for a
+ *  few like backspace and delete will come through here. SDL takes care of
+ *  stuff like applying shift or caps lock properly to the characters.
+ */
+
+static int text_input_handler(SDL_TextInputEvent text) {
+  for (size_t i = 0; (i < SDL_TEXTINPUTEVENT_TEXT_SIZE) && (text.text[i]);
+       i++) {
+    enqueue_char((unsigned char) text.text[i]);
+  }
+}
+
+/*
  *  Functions below are for working with ascii_queue.
  */
 
 #define NEXT_QUEUE_IDX(i) ((i + 1) % ASCII_QUEUE_LEN)
 
-static int enqueue_char(SDL_Keysym keysym) {
+void start_text_input(void) {
+  SDL_StartTextInput();
+  is_on_ascii_queue = 1;
+}
+
+void stop_text_input(void) {
+  SDL_StopTextInput();
+  is_on_ascii_queue = 0;
+}
+
+static int enqueue_char_keysym(SDL_Keysym keysym) {
   if ((keysym.sym <= 0) || (keysym.sym > 127)) {
     return -1;  // not ascii
   }
 
-  unsigned char c = (unsigned char) keysym.sym;
+  return enqueue_char((unsigned char) keysym.sym);
+}
 
+static int enqueue_char(unsigned char c) {
   if (NEXT_QUEUE_IDX(back) == front) {
     // keep back from becoming front (would imply empty queue)
     // effectively we are discarding from front of queue here
@@ -264,7 +318,7 @@ static int dequeue_char(void) {
   return ret;
 }
 
-void clear_ascii_queue(void) {
+void clear_text_input(void) {
   front = 0;
   back = 0;
 }
@@ -273,7 +327,7 @@ void clear_ascii_queue(void) {
  *  Non-static wrapper for above so program can pull characters out of queue.
  */
 
-int getc_ascii(void) {
+int getc_text_input(void) {
   return dequeue_char();
 }
 

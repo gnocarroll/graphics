@@ -12,8 +12,19 @@ int process_events(void);
  *  some kind of messaging or configuring.
  */
 
-void clear_ascii_queue(void);
-int getc_ascii(void);
+#define ASCII_QUEUE_LEN (256)
+
+void start_text_input(void);
+void stop_text_input(void);
+
+void clear_text_input(void);  // empty queue
+int getc_text_input(void);    // get character from front of queue
+
+// only part of ascii space is being used for the purposes of my text input
+// so I will define these constants for left/right arrow key information
+
+#define L_ARROW_CHAR ((unsigned char) 1)
+#define R_ARROW_CHAR ((unsigned char) 2)
 
 /*
  *  Seeing what is/was pressed.
