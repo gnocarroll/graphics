@@ -10,9 +10,9 @@
 #include "event_handling.h"
 #include "shaders.h"
 #include "linalg.h"
+#include "textures.h"
 
 SDL_Window *sdl_setup(const char *);
-void set_texture_options(void);
 void gl_debug_message(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *,
                       const void *);
 
@@ -49,15 +49,13 @@ int main(void) {
 
   set_texture_options();
 
-  int quit = 0;
-
   float vertices[] = {
-    -0.5, -0.5, 0.0,  1.0, 0.0, 0.0,  // colors on the right
-     0.5, -0.5, 0.0,  0.0, 1.0, 0.0,
-     0.0,  0.5, 0.0,  0.0, 0.0, 1.0
+      // positions          // colors           // texture coords
+       0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+       0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+      -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+      -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
   };
-
-  float texCoords[] = { 0.0, 0.0, 1.0, 0.0, 0.5, 1.0 };
 
   unsigned int program = get_program_from_files("vertex.glsl", "frag.glsl");
   
@@ -76,23 +74,12 @@ int main(void) {
   
   glBindVertexArray(VAO);
 
-  unsigned int VBO;
-
-  glGenBuffers(1, &VBO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                        (void *) 0);
-  glEnableVertexAttribArray(0);
-
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                        (void *) (3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
 
   update_time_elapsed();
+  
+  // render loop
+
+  int quit = 0;
 
   while (!quit) {
     // update time elapsed (in this case, between frames) and process events
@@ -168,23 +155,6 @@ SDL_Window *sdl_setup(const char *window_name) {
   SDL_GL_SetSwapInterval(1);
 
   return window;
-}
-
-/*
- *  Set preferred texture options.
- */
-
-void set_texture_options(void) {
-  // texture wrapping option
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-  // how to sample textures
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 /*
