@@ -29,7 +29,12 @@ int getc_text_input(void);    // get character from front of queue
 #define R_ARROW_CHAR ((unsigned char) 2)
 
 /*
- *  Seeing what is/was pressed.
+ *  Seeing what is/was pressed. Right now I don't think "standard" key bindings
+ *  will have the ability to use a combination of keys e.g. CTRL + A. To use
+ *  these three functions below, either provide the ASCII of a character like
+ *  doing was_pressed('a') or use one of the input_enum constants for those
+ *  additional inputs. Also, use lowercase letters and in general the key
+ *  without applying SHIFT to use these functions.
  */
 
 int is_pressed_now(int);
