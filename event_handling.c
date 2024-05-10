@@ -16,7 +16,11 @@ static int text_input_handler(SDL_TextInputEvent);
 
 // for keycodes not ASCII, find idx in input_state_arr
 
-int SDLK_to_idx(SDL_Keycode);
+static int SDLK_to_idx(SDL_Keycode);
+
+// similar to above but for SDL_MouseButtonEvent button to index
+
+static int mouse_button_to_idx(Uint8);
 
 // add/remove from text input queue
 
@@ -180,30 +184,14 @@ static int mouse_button_handler(SDL_MouseButtonEvent button) {
   input_state_arr *state_arr = (state_bool ?
                                 &input_pressed : &input_released);
 
-  switch (button.button) {
-    case SDL_BUTTON_LEFT:
-      input_states[MOUSE1] = state_bool;
-      (*state_arr)[MOUSE1] += button.clicks;
-      break;
-    case SDL_BUTTON_RIGHT:
-      input_states[MOUSE2] = state_bool;
-      (*state_arr)[MOUSE2] += button.clicks;
-      break;
-    case SDL_BUTTON_MIDDLE:
-      input_states[MOUSE3] = state_bool;
-      (*state_arr)[MOUSE3] += button.clicks;
-      break;
-    case SDL_BUTTON_X1:
-      input_states[MOUSE4] = state_bool;
-      (*state_arr)[MOUSE4] += button.clicks;
-      break;
-    case SDL_BUTTON_X2:
-      input_states[MOUSE5] = state_bool;
-      (*state_arr)[MOUSE5] += button.clicks;
-      break;
+  int idx = mouse_button_to_idx(button.button);
+
+  if (idx != -1) {
+    input_states[idx] = state_bool;
+    (*state_arr)[idx] += button.clicks;
   }
 
-  if (state_bool) {
+  if ((state_bool) && (idx == MOUSE1)) {  // only for left click currently
     if (first_mouse_click_x == -1) {  // Has not been modified yet for frame
       first_mouse_click_x = button.x;
       first_mouse_click_y = button.y;
@@ -365,7 +353,7 @@ int get_last_mouse_click_y(void) {
  *  Should be relatively efficient way of doing this but is ugly.
  */
 
-int SDLK_to_idx(SDL_Keycode keycode) {
+static int SDLK_to_idx(SDL_Keycode keycode) {
   switch (keycode) {
     // Arrow keys
 
@@ -427,6 +415,29 @@ int SDLK_to_idx(SDL_Keycode keycode) {
       return RALT;
     case SDLK_LALT:
       return LALT;
+    default:
+      break;
+  }
+
+  return -1;
+}
+
+/*
+ *  From "button" part of event to index in input state array.
+ */
+
+static int mouse_button_to_idx(Uint8 button) {
+  switch (button) {
+    case SDL_BUTTON_LEFT:
+      return MOUSE1;
+    case SDL_BUTTON_RIGHT:
+      return MOUSE2;
+    case SDL_BUTTON_MIDDLE:
+      return MOUSE3;
+    case SDL_BUTTON_X1:
+      return MOUSE4;
+    case SDL_BUTTON_X2:
+      return MOUSE5;
     default:
       break;
   }
