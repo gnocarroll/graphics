@@ -45,7 +45,8 @@ unsigned int get_texture(const char *filepath) {
   // glTexImage2D(target, mipmap level, format for storage, w, h, always 0,
   //              origin format, origin data type, data itself);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+               (n_channels == 3 ? GL_RGB : GL_RGBA),  // 3 or 4 for now
                GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);  // OpenGL can generate us mipmap
 

@@ -81,7 +81,13 @@ int main(void) {
 
   // data, n vertices, n attr, len of attrs, usage for glBufferData
 
-  unsigned int texture = get_texture("assets/container.jpg");
+  unsigned int texture1 = get_texture("assets/container.jpg");
+  unsigned int texture2 = get_texture("assets/awesomeface.png");
+
+  glUniform1i(glGetUniformLocation(program, "texture1"), 0);
+
+  glUniform1i(glGetUniformLocation(program, "texture2"), 1);
+
   unsigned int VBO = get_VBO(vertices, 4, 3, attr_lens, GL_STATIC_DRAW);
   unsigned int EBO = get_EBO(indices, 6, GL_STATIC_DRAW);
 
@@ -105,9 +111,13 @@ int main(void) {
     glClearColor(0.2, 0.3, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
     // primitive to draw, start index, n vertices
 
-    glBindTexture(GL_TEXTURE_2D, texture);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     SDL_GL_SwapWindow(window);
