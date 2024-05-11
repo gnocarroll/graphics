@@ -1,6 +1,10 @@
 #ifndef GFX_UTIL_H
 #define GFX_UTIL_H
 
+#include <stddef.h>
+
+#include <glad/glad.h>
+
 #include "gfx_config.h"
 
 /*
@@ -33,5 +37,24 @@
 
 void update_time_elapsed(void);
 float get_time_elapsed(void);
+
+/*
+ *  vertices - data
+ *  n_vertices - number of vertices
+ *  n_attr - # attr / vert
+ *  attr_lens - lengths for each attribute
+ *  GLenum usage - usage parameter for glBufferData() 
+ */
+
+unsigned int get_VBO(float *vertices, size_t n_vertices, size_t n_attr,
+                     size_t *attr_lens, GLenum usage);
+
+/*
+ *  indices - data
+ *  n_indices - len
+ *  usage - for glBufferData
+ */
+
+unsigned int get_EBO(unsigned int *indices, size_t n_indices, GLenum usage);
 
 #endif // GFX_UTIL_H

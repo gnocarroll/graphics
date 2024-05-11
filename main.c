@@ -57,6 +57,11 @@ int main(void) {
       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
   };
 
+  unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
+  };
+
   unsigned int program = get_program_from_files("vertex.glsl", "frag.glsl");
   
   if (!program) {
@@ -66,14 +71,19 @@ int main(void) {
 
   glUseProgram(program);
 
-  int ourColorLoc = glGetUniformLocation(program, "ourColor");
-
   unsigned int VAO;
 
   glGenVertexArrays(1, &VAO);
   
   glBindVertexArray(VAO);
 
+  size_t attr_lens[] = { 3, 3, 2 };
+
+  // data, n vertices, n attr, len of attrs, usage for glBufferData
+
+  unsigned int texture = get_texture("assets/container.jpg");
+  unsigned int VBO = get_VBO(vertices, 4, 3, attr_lens, GL_STATIC_DRAW);
+  unsigned int EBO = get_EBO(indices, 6, GL_STATIC_DRAW);
 
   update_time_elapsed();
   
@@ -97,7 +107,8 @@ int main(void) {
 
     // primitive to draw, start index, n vertices
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     SDL_GL_SwapWindow(window);
   }

@@ -72,3 +72,14 @@ unsigned int get_VBO(float *vertices, size_t n_vertices, size_t n_attr,
   return VBO;
 }
 
+unsigned int get_EBO(unsigned int *indices, size_t n_indices, GLenum usage) {
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, n_indices * sizeof(unsigned int),
+               indices, usage);
+
+  return EBO;
+}
+
