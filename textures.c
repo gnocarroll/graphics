@@ -22,6 +22,11 @@ void set_texture_options(void) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  // OpenGL expects y-axis 0.0 to be on the bottom, images generally do the
+  // opposite
+
+  stbi_set_flip_vertically_on_load(1);
 }
 
 /*
