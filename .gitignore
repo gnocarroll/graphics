@@ -4,7 +4,7 @@
 
 # Ignore glad
 
-glad
+glad.c
 
 # Ignore executable (change this if executable name changes)
 
