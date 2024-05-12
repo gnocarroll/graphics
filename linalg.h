@@ -185,6 +185,12 @@ static inline mat4 mat4_translate(mat4 m, vec3 v) {
 }
 
 static inline mat4 get_rotation_mat4(float radians, vec3 v) {
+  float v_len = sqrtf(vec3_dot(v, v));
+
+  v.x /= v_len;
+  v.y /= v_len;
+  v.z /= v_len;
+
   float sin_val = sinf(radians);
   float cos_val = cosf(radians);
   float one_minus_cos = 1.0f - cos_val;
@@ -212,9 +218,10 @@ static inline mat4 get_rotation_mat4(float radians, vec3 v) {
 // matrix to apply it to, rotation amount in radians, axis of rotation
 
 static inline mat4 mat4_rotate(mat4 m, float radians, vec3 v) {
-  
+  return mat4_mult(get_rotation_mat4(radians, v), m);
 }
 
 #define translate(m, v) mat4_translate(m, v)
+#define rotate(m, r, v) mat4_rotate(m, r, v)
 
 #endif // LINALG_H

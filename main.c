@@ -92,7 +92,17 @@ int main(void) {
   unsigned int EBO = get_EBO(indices, 6, GL_STATIC_DRAW);
 
   update_time_elapsed();
-  
+ 
+  mat4 trans = mat4_identity();
+  trans = rotate(trans, RADIANS(90.0f), VEC3(0.0f, 0.0f, 1.0f));
+
+  unsigned int transformLoc = glGetUniformLocation(program, "transform");
+
+  // GL_TRUE is for transpose arg since my matrices are row-major but OpenGL
+  // uses column major
+
+  glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &trans);
+
   // render loop
 
   int quit = 0;
