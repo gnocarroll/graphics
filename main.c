@@ -95,6 +95,7 @@ int main(void) {
  
   mat4 trans = mat4_identity();
   trans = rotate(trans, RADIANS(90.0f), VEC3(0.0f, 0.0f, 1.0f));
+  trans = scale(trans, VEC3(0.5f, 0.5f, 0.5f));
 
   unsigned int transformLoc = glGetUniformLocation(program, "transform");
 

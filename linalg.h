@@ -96,11 +96,7 @@ static inline vec4 vec4_add(vec4 arg1, vec4 arg2) {
 }
 
 static inline vec4 vec4_scale(float f, vec4 v) {
-  for (uint8_t i = 0; i < 4; i++) {
-    v.data[i] *= f;
-  }
-
-  return v;
+  return VEC4(f * v.x, f * v.y, f * v.z, f * v.w);
 }
 
 // cross product
@@ -177,9 +173,9 @@ static inline mat4 mat4_mult(mat4 m1, mat4 m2) {
 }
 
 static inline mat4 mat4_translate(mat4 m, vec3 v) {
-  for (uint8_t i = 0; i < 3; i++) {
-    m.vec[i] = vec4_add(m.vec[i], vec4_scale(v.data[i], m.vec[3]));
-  }
+  m.vec[0] = vec4_add(m.vec[0], vec4_scale(v.data[0], m.vec[3]));
+  m.vec[1] = vec4_add(m.vec[1], vec4_scale(v.data[1], m.vec[3]));
+  m.vec[2] = vec4_add(m.vec[2], vec4_scale(v.data[2], m.vec[3]));
 
   return m;
 }
@@ -221,7 +217,18 @@ static inline mat4 mat4_rotate(mat4 m, float radians, vec3 v) {
   return mat4_mult(get_rotation_mat4(radians, v), m);
 }
 
+// v will contain scaling factors for x, y, z axis
+
+static inline mat4 mat4_scale(mat4 m, vec3 v) {
+  m.vec[0] = vec4_scale(v.data[0], m.vec[0]);
+  m.vec[1] = vec4_scale(v.data[1], m.vec[1]);
+  m.vec[2] = vec4_scale(v.data[2], m.vec[2]);
+
+  return m;
+}
+
 #define translate(m, v) mat4_translate(m, v)
 #define rotate(m, r, v) mat4_rotate(m, r, v)
+#define scale(m, v)     mat4_scale(m, v)
 
 #endif // LINALG_H
