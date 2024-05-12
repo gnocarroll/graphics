@@ -115,11 +115,39 @@ static inline mat4 mat4_diag(float val) {
       0.0f, val,  0.0f, 0.0f,
       0.0f, 0.0f, val,  0.0f,
       0.0f, 0.0f, 0.0f, val
-    } });
+    }
+  });
 }
 
 static inline mat4 mat4_identity(void) {
   return mat4_diag(1.0f);
+}
+
+static inline mat4 mat4_transpose(mat4 m) {
+  return ((mat4) { .vec = {
+      [0].data = m.vec[0].data[0], m.vec[1].data[0],
+                 m.vec[2].data[0], m.vec[3].data[0],
+      [1].data = m.vec[0].data[1], m.vec[1].data[1],
+                 m.vec[2].data[1], m.vec[3].data[1],
+      [2].data = m.vec[0].data[2], m.vec[1].data[2],
+                 m.vec[2].data[2], m.vec[3].data[2],
+      [3].data = m.vec[0].data[3], m.vec[1].data[3],
+                 m.vec[2].data[3], m.vec[3].data[3],
+    }
+  });
+}
+
+#define mat4_t(m) mat4_transpose(m)
+
+// various operations involving mat4
+
+static inline vec4 vec4_mult(mat4 m, vec4 v) {
+  return ((vec4) .data = {
+    vec4_dot(m.vec[0], v),
+    vec4_dot(m.vec[1], v),
+    vec4_dot(m.vec[2], v),
+    vec4_dot(m.vec[3], v),
+  });
 }
 
 static inline mat4 mat4_translate(mat4 m, vec3 v) {
