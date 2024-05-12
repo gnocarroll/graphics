@@ -92,17 +92,6 @@ int main(void) {
   unsigned int EBO = get_EBO(indices, 6, GL_STATIC_DRAW);
 
   update_time_elapsed();
- 
-  mat4 trans = mat4_identity();
-  trans = rotate(trans, RADIANS(90.0f), VEC3(0.0f, 0.0f, 1.0f));
-  trans = scale(trans, VEC3(0.5f, 0.5f, 0.5f));
-
-  unsigned int transformLoc = glGetUniformLocation(program, "transform");
-
-  // GL_TRUE is for transpose arg since my matrices are row-major but OpenGL
-  // uses column major
-
-  glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &trans);
 
   // render loop
 
@@ -121,6 +110,19 @@ int main(void) {
 
     glClearColor(0.2, 0.3, 0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
+    
+    mat4 trans = mat4_identity();
+    
+    trans = scale(trans, VEC3(0.5f, 0.5f, 0.5f));
+    trans = rotate(trans, GET_SECS(), VEC3(0.0f, 0.0f, 1.0f));
+    trans = translate(trans, VEC3(0.5f, -0.5f, 0.0f));
+
+    unsigned int transformLoc = glGetUniformLocation(program, "transform");
+
+    // GL_TRUE is for transpose arg since my matrices are row-major but OpenGL
+    // uses column major
+
+    glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &trans);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);

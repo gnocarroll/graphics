@@ -12,6 +12,8 @@
 
 // some macros
 
+#define ABS(x) ((x) >= 0 ? (x) : (-(x)))
+
 // degrees to radians and vice versa
 
 #define RADIANS(x) ((x) * PI / 180.0f)
@@ -183,9 +185,11 @@ static inline mat4 mat4_translate(mat4 m, vec3 v) {
 static inline mat4 get_rotation_mat4(float radians, vec3 v) {
   float v_len = sqrtf(vec3_dot(v, v));
 
-  v.x /= v_len;
-  v.y /= v_len;
-  v.z /= v_len;
+  if (ABS(v_len - 1.0f) > 0.001f) {
+    v.x /= v_len;
+    v.y /= v_len;
+    v.z /= v_len;
+  }
 
   float sin_val = sinf(radians);
   float cos_val = cosf(radians);
