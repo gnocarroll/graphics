@@ -3,14 +3,15 @@
 #include <stdio.h>
 
 int main(void) {
-  mat4_print(mat4_translate(mat4_identity(), VEC3(1.0f, 2.0f, 3.0f)));
-
-  mat4_print(mat4_transpose(((mat4) { .data = {
-      1, 2, 3, 4,
-      0, 2, 3, 4,
-      0, 0, 3, 4,
-      0, 0, 0, 4
-    } })
+  mat4_print(mat4_mult(
+    ((mat4) { .data = {  4,  3,  1, 0,
+                      -5,  7,  2, 0,
+                       3,  2,  6, 0,
+                       0,  0,  0, 0 } }),
+    ((mat4) { .data = {  1,  2,  2, 0,
+                      -4,  3, -7, 0,
+                       4,  6, -8, 0,
+                       0,  0,  0, 0 } })
   ));
 
   return 0;

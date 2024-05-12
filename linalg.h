@@ -4,6 +4,19 @@
 #include <stdint.h>
 #include <math.h>
 
+// CONSTANTS
+
+// 20 decimal places for pi, single-precision float constant
+
+#define PI (3.14159265358979323846f)
+
+// some macros
+
+// degrees to radians and vice versa
+
+#define RADIANS(x) ((x) * PI / 180.0f)
+#define DEGREES(x) ((x) * 180.0f / PI)
+
 // VECTORS
 // float vectors
 
@@ -142,11 +155,24 @@ static inline mat4 mat4_transpose(mat4 m) {
 // various operations involving mat4
 
 static inline vec4 vec4_mult(mat4 m, vec4 v) {
-  return ((vec4) .data = {
-    vec4_dot(m.vec[0], v),
-    vec4_dot(m.vec[1], v),
-    vec4_dot(m.vec[2], v),
-    vec4_dot(m.vec[3], v),
+  return ((vec4) { .data = {
+      vec4_dot(m.vec[0], v),
+      vec4_dot(m.vec[1], v),
+      vec4_dot(m.vec[2], v),
+      vec4_dot(m.vec[3], v),
+    }
+  });
+}
+
+static inline mat4 mat4_mult(mat4 m1, mat4 m2) {
+  mat4 m2_t = mat4_transpose(m2);
+
+  return ((mat4) { .vec = {
+      [0] = vec4_mult(m2_t, m1.vec[0]),
+      [1] = vec4_mult(m2_t, m1.vec[1]),
+      [2] = vec4_mult(m2_t, m1.vec[2]),
+      [3] = vec4_mult(m2_t, m1.vec[3])
+    }
   });
 }
 
@@ -156,6 +182,37 @@ static inline mat4 mat4_translate(mat4 m, vec3 v) {
   }
 
   return m;
+}
+
+static inline mat4 get_rotation_mat4(float radians, vec3 v) {
+  float sin_val = sinf(radians);
+  float cos_val = cosf(radians);
+  float one_minus_cos = 1.0f - cos_val;
+
+  float x_y_prod = v.x * v.y * one_minus_cos;
+  float x_z_prod = v.x * v.z * one_minus_cos;
+  float y_z_prod = v.y * v.z * one_minus_cos;
+
+  float x_sin_prod = v.x * sin_val;
+  float y_sin_prod = v.y * sin_val;
+  float z_sin_prod = v.z * sin_val;
+
+  return ((mat4) { .vec = {
+      [0].data = { cos_val + v.x * v.x * one_minus_cos, x_y_prod - z_sin_prod,
+                   x_z_prod + y_sin_prod, 0.0f },
+      [1].data = { x_y_prod + z_sin_prod, cos_val + v.y * v.y * one_minus_cos,
+                   y_z_prod - x_sin_prod, 0.0f },
+      [2].data = { x_z_prod - y_sin_prod, y_z_prod + x_sin_prod,
+                   cos_val + v.z * v.z * one_minus_cos, 0.0f },
+      [3].data = { 0.0f, 0.0f, 0.0f, 1.0f }
+    }
+  });
+}
+
+// matrix to apply it to, rotation amount in radians, axis of rotation
+
+static inline mat4 mat4_rotate(mat4 m, float radians, vec3 v) {
+  
 }
 
 #define translate(m, v) mat4_translate(m, v)
