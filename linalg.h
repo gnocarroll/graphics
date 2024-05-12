@@ -1,6 +1,9 @@
 #ifndef LINALG_H
 #define LINALG_H
 
+#include <stdint.h>
+#include <math.h>
+
 // VECTORS
 // float vectors
 
@@ -51,15 +54,15 @@ typedef struct vec4 {
 // inline functions
 // dot product
 
-inline float vec2_dot(vec2 arg1, vec2 arg2) {
+static inline float vec2_dot(vec2 arg1, vec2 arg2) {
   return MULT_MEMBER(x) + MULT_MEMBER(y);
 }
 
-inline float vec3_dot(vec3 arg1, vec3 arg2) {
+static inline float vec3_dot(vec3 arg1, vec3 arg2) {
   return MULT_MEMBER(x) + MULT_MEMBER(y) + MULT_MEMBER(z);
 }
 
-inline float vec4_dot(vec4 arg1, vec4 arg2) {
+static inline float vec4_dot(vec4 arg1, vec4 arg2) {
   return MULT_MEMBER(x) + MULT_MEMBER(y) + MULT_MEMBER(z) + MULT_MEMBER(w);
 }
 
@@ -67,26 +70,66 @@ inline float vec4_dot(vec4 arg1, vec4 arg2) {
 
 #define ADD_MEMBER(a) (arg1.a + arg2.a)
 
-inline vec2 vec2_add(vec2 arg1, vec2 arg2) {
+static inline vec2 vec2_add(vec2 arg1, vec2 arg2) {
   return VEC2(ADD_MEMBER(x), ADD_MEMBER(y));
 }
 
-inline vec3 vec3_add(vec3 arg1, vec3 arg2) {
+static inline vec3 vec3_add(vec3 arg1, vec3 arg2) {
   return VEC3(ADD_MEMBER(x), ADD_MEMBER(y), ADD_MEMBER(z));
 }
 
-inline vec4 vec4_add(vec4 arg1, vec4 arg2) {
+static inline vec4 vec4_add(vec4 arg1, vec4 arg2) {
   return VEC4(ADD_MEMBER(x), ADD_MEMBER(y), ADD_MEMBER(z), ADD_MEMBER(w));
+}
+
+static inline vec4 vec4_scale(float f, vec4 v) {
+  for (uint8_t i = 0; i < 4; i++) {
+    v.data[i] *= f;
+  }
+
+  return v;
 }
 
 // cross product
 
 #define CROSS_MEMBERS(a, b) (arg1.a * arg2.b - arg1.b * arg2.a)
 
-inline vec3 vec3_cross(vec3 arg1, vec3 arg2) {
+static inline vec3 vec3_cross(vec3 arg1, vec3 arg2) {
   return VEC3(CROSS_MEMBERS(y, x), CROSS_MEMBERS(z, x), CROSS_MEMBERS(x, y));
 }
 
+// matrices
 
+typedef struct mat4 {
+  union {
+    float data[16];
+    vec4 vec[4];
+  };
+} mat4;
+
+void mat4_print(mat4);
+
+static inline mat4 mat4_diag(float val) {
+  return ((mat4) { .data = {
+      val,  0.0f, 0.0f, 0.0f,
+      0.0f, val,  0.0f, 0.0f,
+      0.0f, 0.0f, val,  0.0f,
+      0.0f, 0.0f, 0.0f, val
+    } });
+}
+
+static inline mat4 mat4_identity(void) {
+  return mat4_diag(1.0f);
+}
+
+static inline mat4 mat4_translate(mat4 m, vec3 v) {
+  for (uint8_t i = 0; i < 3; i++) {
+    m.vec[i] = vec4_add(m.vec[i], vec4_scale(v.data[i], m.vec[3]));
+  }
+
+  return m;
+}
+
+#define translate(m, v) mat4_translate(m, v)
 
 #endif // LINALG_H

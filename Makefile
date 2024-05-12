@@ -15,7 +15,7 @@ all: $(GOAL)
 
 # Generate object files
 
-objects=main.o glad.o event_handling.o shaders.o gfx_util.o linalg.o textures.o
+objects=main.o glad.o event_handling.o shaders.o gfx_util.o linalg.o textures.o stb_image.o
 objects_w_hdr=
 
 $(objects): %.o: %.c
@@ -28,6 +28,9 @@ $(GOAL): $(objects) $(objects_w_hdr)
 	$(CC) $^ $(LDLIBS) -o $@
 
 # Other
+
+linalg_test: linalg.h linalg.c linalg_test.c
+	$(CC) -g linalg.c linalg_test.c -o $@
 
 .PHONY: clean
 clean:
