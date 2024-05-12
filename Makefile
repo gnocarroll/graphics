@@ -32,7 +32,9 @@ $(GOAL): $(objects) $(objects_w_hdr)
 linalg_test: linalg.h linalg.c linalg_test.c
 	$(CC) -g linalg.c linalg_test.c -o $@
 
+executables = $(GOAL) linalg_test
+
 .PHONY: clean
 clean:
-	rm -f $(GOAL) *.o
+	rm -f $(executables) *.o
 

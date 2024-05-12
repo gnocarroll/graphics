@@ -14,3 +14,7 @@ learn_gfx
 
 stb_image.h
 
+# Other executables
+
+linalg_test
+
